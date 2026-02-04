@@ -1,0 +1,13 @@
+{
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "focusima_dev",
+    "entities": ["src/**/*.orm-entity.ts"],
+    "migrations": ["src/infrastructure/database/migrations/*.ts"],
+    "cli": {
+        "migrationsDir": "src/infrastructure/database/migrations"
+    }
+}
