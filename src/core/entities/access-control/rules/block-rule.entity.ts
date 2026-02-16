@@ -1,9 +1,9 @@
-import { AccessRule, IAccessRule, AccessRuleEffect } from './access-rule';
+import { AccessRule, IAccessRuleInput, AccessRuleEffect } from './access-rule';
 
 export class BlockRule extends AccessRule {
     private readonly _effect = AccessRuleEffect.Block;
 
-    constructor(props: IAccessRule) {
+    constructor(props: IAccessRuleInput) {
         super(props);
     }
 
