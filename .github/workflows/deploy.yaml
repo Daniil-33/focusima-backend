@@ -1,0 +1,71 @@
+name: CI/CD Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - stage
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ghcr.io/${{ secrets.GHCR_USERNAME }}/focusima-backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Login to GitHub Container Registry
+        run: echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+      - name: Determine image tag
+        id: tag
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/stage" ]]; then
+            echo "tag=stage" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            # Определяем версию автоматически (можно брать из package.json)
+            VERSION=$(node -p "require('./package.json').version")
+            echo "tag=v$VERSION" >> $GITHUB_ENV
+          elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            echo "tag=$TAG_NAME" >> $GITHUB_ENV
+          else
+            echo "tag=latest" >> $GITHUB_ENV
+          fi
+          echo "Tag for image: $tag"
+
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_NAME:${{ env.tag }} .
+
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_NAME:${{ env.tag }}
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            if [[ "${GITHUB_REF}" == "refs/heads/stage" ]]; then
+              cd /var/www/stage
+              docker compose pull
+              docker compose up -d
+            elif [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+              cd /var/www/prod
+              docker compose pull
+              docker compose up -d
+            elif [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+              cd /var/www/prod
+              docker compose pull
+              docker compose up -d
+            fi

@@ -28,14 +28,11 @@ export class UserMapper {
     }
 
     // Partial Domain → Partial ORM (для обновлений)
-    static toOrmPartial(
-        domain: Partial<User>,
-    ): Partial<UserOrmEntity> {
+    static toOrmPartial(domain: Partial<User>): Partial<UserOrmEntity> {
         const partial: Partial<UserOrmEntity> = {};
         if (domain.name !== undefined) partial.name = domain.name;
         if (domain.email !== undefined) partial.email = domain.email;
-        if (domain.updatedAt !== undefined)
-            partial.updatedAt = domain.updatedAt;
+        if (domain.updatedAt !== undefined) partial.updatedAt = domain.updatedAt;
         return partial;
     }
 }

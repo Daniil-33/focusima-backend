@@ -10,9 +10,11 @@ import {
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
+
 import { CreateUserDto } from '../dto/user/create-user.dto';
 import { UpdateUserDto } from '../dto/user/update-user.dto';
 import { UserResponseDto } from '../dto/user/user-response.dto';
+
 import { CreateUserUseCase } from '../../core/use-cases/user/create-user.use-case';
 import { GetUserUseCase } from '../../core/use-cases/user/get-user.use-case';
 import { GetAllUsersUseCase } from '../../core/use-cases/user/get-all-users.use-case';
@@ -32,7 +34,6 @@ export class UserController {
     @Post()
     @HttpCode(HttpStatus.CREATED)
     async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
-        console.log('Received CreateUserDto:', createUserDto);
         const user = await this.createUserUseCase.execute(createUserDto);
         return UserResponseDto.fromEntity(user);
     }
