@@ -1,5 +1,6 @@
 // Domain Entity - чистая бизнес-модель пользователя
 import { randomUUID } from 'crypto';
+import * as bycrypt from 'bcrypt';
 
 export class User {
     private readonly _id: string;
@@ -54,8 +55,11 @@ export class User {
 
     // Business methods
     hashPassword(password: string): string {
-        // Здесь должно быть реальное хеширование пароля
-        return `hashed_${password}`;
+        return bycrypt.hashSync(password, 10);
+    }
+
+    comparePassword(plainPassword: string): boolean {
+        return bycrypt.compareSync(plainPassword, this._passwordHash);
     }
 
     updateName(name: string): void {
